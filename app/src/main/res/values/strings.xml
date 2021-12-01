@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Audio Player</string>
+    <string name="notification_channel_name">Music</string>
+    <string name="notification_channel_description">Notification channel for playing music</string>
+</resources>
