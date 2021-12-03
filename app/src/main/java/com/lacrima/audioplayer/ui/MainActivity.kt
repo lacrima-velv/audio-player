@@ -55,8 +55,6 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         setUiWindowInsetsBottom(binding.nextSong)
         setUiWindowInsetsTop(binding.appbar)
 
-
-
         lifecycleScope.launchWhenStarted {
             launch(Dispatchers.IO) {
                 updateCurrentPlayerPosition()
@@ -78,7 +76,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                         when (result.status) {
                             ERROR -> Snackbar.make(
                                 binding.root,
-                                result.message ?: "An unknown error occurred",
+                                result.message ?: getString(R.string.unknown_error),
                                 Snackbar.LENGTH_SHORT
                             ).show()
                             else -> Unit
@@ -90,7 +88,8 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                 // It's called every time we paused/start playing
                 mainViewModel.playbackState.collectLatest { playbackState ->
                     binding.playPause.setImageResource(
-                        if (playbackState?.isPlaying == true) R.drawable.ic_round_pause_circle_outline_48
+                        if (playbackState?.isPlaying == true)
+                            R.drawable.ic_round_pause_circle_outline_48
                         else R.drawable.ic_round_play_circle_outline_48
                     )
                     binding.seekBar.progress = playbackState?.position?.toInt() ?: 0
@@ -102,8 +101,6 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                     when (result.status) {
                         SUCCESS -> {
                             listOfSongs = result.data
-                            Timber.d("mediaItems: listOfSongs is $listOfSongs. result.data is ${result.data}")
-
                             updateNextSongTitleArtist()
                         }
                         else -> Unit
@@ -122,8 +119,6 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                     }
                     binding.artist.text = songMetadata?.description?.subtitle ?: ""
                     binding.songTitle.text = songMetadata?.description?.title ?: ""
-
-                    //?: R.drawable.ic_baseline_music_note_96
 
                     Glide.with(this@MainActivity).asBitmap()
                         .load(
@@ -149,7 +144,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                         when (result.status) {
                             ERROR -> Snackbar.make(
                                 binding.root,
-                                result.message ?: "An unknown error occurred",
+                                result.message ?: getString(R.string.unknown_error),
                                 Snackbar.LENGTH_LONG
                             ).show()
                             else -> Unit
@@ -203,28 +198,26 @@ class MainActivity : AppCompatActivity(), KoinComponent {
 
         if (currentlyPlayingSongPosition != listOfSongs?.size?.minus(1)) {
             nextSongTitle = listOfSongs?.get(currentlyPlayingSongPosition?.plus(1) ?: 0)
-                ?.title ?: "Unknown"
+                ?.title ?: getString(R.string.unknown)
             nextSongArtist = listOfSongs?.get(currentlyPlayingSongPosition?.plus(1) ?: 0)
-                ?.artist ?: "Unknown"
+                ?.artist ?: getString(R.string.unknown)
         } else {
-            nextSongTitle = listOfSongs?.get(0)?.title ?: "Unknown"
-            nextSongArtist = listOfSongs?.get(0)?.artist ?: "Unknown"
+            nextSongTitle = listOfSongs?.get(0)?.title ?: getString(R.string.unknown)
+            nextSongArtist = listOfSongs?.get(0)?.artist ?: getString(R.string.unknown)
         }
 
-
-        binding.nextSong.text = "Next: "+ nextSongArtist + " - " + nextSongTitle
+        binding.nextSong.text = getString(R.string.next_song, nextSongArtist, nextSongTitle)
     }
 
     private suspend fun updateCurrentPlayerPosition() {
-        Timber.d("updateCurrentPlayerPosition() is called")
-                while (true) {
-                    if (mainViewModel.playbackState.value?.currentPlaybackPosition != null) {
-                        val pos = mainViewModel.playbackState.value!!.currentPlaybackPosition
-                        if (mainViewModel.currentPlayerPosition.value != pos) {
-                            mainViewModel.updateCurrentPlayerPosition(pos)
-                        }
-                        delay(UPDATE_PLAYER_POSITION_INTERVAL)
-                    }
+        while (true) {
+            if (mainViewModel.playbackState.value?.currentPlaybackPosition != null) {
+                val pos = mainViewModel.playbackState.value!!.currentPlaybackPosition
+                if (mainViewModel.currentPlayerPosition.value != pos) {
+                    mainViewModel.updateCurrentPlayerPosition(pos)
                 }
+                delay(UPDATE_PLAYER_POSITION_INTERVAL)
+            }
+        }
     }
 }

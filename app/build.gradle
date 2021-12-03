@@ -57,8 +57,6 @@ dependencies {
 
     implementation "io.insert-koin:koin-core:$koin_version"
     implementation "io.insert-koin:koin-android:$koin_version"
-    // TODO: Do I need it?
-    api "androidx.media:media:$androidx_media_version"
 
     // Glide dependencies
     implementation "com.github.bumptech.glide:glide:$glide_version"

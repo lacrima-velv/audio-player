@@ -35,7 +35,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/appbar"
-        tools:src="@drawable/ic_music_note_notification" />
+        tools:src="@drawable/ic_music_note_notification"
+        android:importantForAccessibility="no"/>
 
     <TextView
         android:id="@+id/artist"
@@ -85,7 +86,8 @@
         app:layout_constraintEnd_toStartOf="@+id/play_pause"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/song_title" />
+        app:layout_constraintTop_toBottomOf="@id/song_title"
+        android:contentDescription="@string/skip_to_the_previous_song" />
 
     <ImageButton
         android:id="@+id/play_pause"
@@ -97,7 +99,8 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/skip_to_previous"
         app:layout_constraintTop_toBottomOf="@id/song_title"
-        app:layout_constraintBottom_toTopOf="@id/seekBar"/>
+        app:layout_constraintBottom_toTopOf="@id/seekBar"
+        android:contentDescription="@string/play_or_pause_the_music" />
 
     <ImageButton
         android:id="@+id/skip_to_next"
@@ -109,8 +112,8 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/play_pause"
-        app:layout_constraintTop_toBottomOf="@id/song_title" />
-
+        app:layout_constraintTop_toBottomOf="@id/song_title"
+        android:contentDescription="@string/skip_to_the_next_song" />
 
     <ImageView
         android:id="@+id/music_queue"
@@ -120,7 +123,8 @@
         android:src="@drawable/ic_baseline_queue_music_48"
         app:layout_constraintBottom_toBottomOf="@id/next_song"
         app:layout_constraintTop_toTopOf="@id/next_song"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:importantForAccessibility="no" />
 
     <TextView
         android:id="@+id/next_song"
@@ -142,7 +146,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
-        android:text="00:00"
+        android:text="@string/playback_time"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar"
         app:layout_constraintEnd_toStartOf="@id/seekBar"
         app:layout_constraintStart_toStartOf="parent"
@@ -166,7 +170,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
-        android:text="00:00"
+        android:text="@string/playback_time"
         app:layout_constraintBottom_toBottomOf="@+id/seekBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/seekBar"
@@ -182,7 +186,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@id/music_queue" />
+        app:layout_constraintTop_toTopOf="@id/music_queue"
+        android:importantForAccessibility="no" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

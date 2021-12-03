@@ -21,6 +21,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSource
+import com.lacrima.audioplayer.R
 import com.lacrima.audioplayer.data.AudioFilesSource.asMediaItems
 import com.lacrima.audioplayer.data.AudioFilesSource.asMediaSource
 import com.lacrima.audioplayer.data.AudioFilesSource.audioFilesMetadata
@@ -29,7 +30,6 @@ import com.lacrima.audioplayer.data.AudioFilesSource.whenReady
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import timber.log.Timber
 
 const val MEDIA_ROOT_ID = "root_id"
 private const val SERVICE_TAG = "MusicService"
@@ -248,7 +248,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            val message = "The application has encountered an unexpected error";
+            val message = getString(R.string.unexpected_error)
             Toast.makeText(
                 this@MusicService,
                 message,

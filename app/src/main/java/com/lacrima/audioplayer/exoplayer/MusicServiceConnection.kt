@@ -96,15 +96,18 @@ class MusicServiceConnection(context: Context) {
 
     private inner class MediaControllerCallback : MediaControllerCompat.Callback() {
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            Timber.d("onPlaybackStateChanged() is called. playbackState is ${_playbackState.value}")
+            Timber.d("onPlaybackStateChanged() is called. playbackState is " +
+                    "${_playbackState.value}")
             _playbackState.value = state
         }
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             Timber.d("onMetadataChanged() is called")
-            _currentlyPlayingSongDuration.value = metadata?.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) ?: 0
+            _currentlyPlayingSongDuration.value = metadata?.
+            getLong(MediaMetadataCompat.METADATA_KEY_DURATION) ?: 0
             // onMetadataChanged could be called several times, but the song doesn't always changes
-            if (_currentlyPlayingSong.value?.description?.mediaId != metadata?.description?.mediaId) {
+            if (_currentlyPlayingSong.value?.description?.mediaId !=
+                metadata?.description?.mediaId) {
                 Timber.d("Currently playing song changed")
                 _currentlyPlayingSong.value = metadata
             }

@@ -29,45 +29,8 @@ object Util {
                 "//" + context.packageName + "/raw/" + fileResource)
     }
 
-    fun getRawUri(context: Context, fileResource: Int): Uri {
+    fun getRawUri(fileResource: Int): Uri {
         return RawResourceDataSource.buildRawResourceUri(fileResource)
-    }
-
-    /**
-     * Returns a Content Uri for the AlbumArtContentProvider
-     */
-    fun File.asAlbumArtContentUri(): Uri {
-        return Uri.Builder()
-            .scheme(ContentResolver.SCHEME_CONTENT)
-            .authority(AUTHORITY)
-            .appendPath(this.path)
-            .build()
-    }
-
-    inline val MediaMetadataCompat.mediaUri: Uri
-        get() = this.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri()
-
-    /**
-     * Extension method for building an [ExtractorMediaSource] from a [MediaMetadataCompat] object.
-     *
-     * For convenience, place the [MediaDescriptionCompat] into the tag so it can be retrieved later.
-     */
-    fun MediaMetadataCompat.toMediaSource(dataSourceFactory: DataSource.Factory) =
-        ProgressiveMediaSource.Factory(dataSourceFactory).createMediaSource(mediaUri)
-
-    /**
-     * Extension method for building a [ConcatenatingMediaSource] given a [List]
-     * of [MediaMetadataCompat] objects.
-     */
-    fun List<MediaMetadataCompat>.toMediaSource(
-        dataSourceFactory: DataSource.Factory
-    ): ConcatenatingMediaSource {
-
-        val concatenatingMediaSource = ConcatenatingMediaSource()
-        forEach {
-            concatenatingMediaSource.addMediaSource(it.toMediaSource(dataSourceFactory))
-        }
-        return concatenatingMediaSource
     }
 
     /**
@@ -99,27 +62,4 @@ object Util {
             insets
         }
     }
-
-//    fun getAudioFilesObjects(context: Context): List<Song> {
-//        val audioFilesObjects = mutableListOf<Song>()
-//        AudioFilesSource.getAudioFilesMetadata(context).forEach { audioFileMeta ->
-//            audioFilesObjects.add(
-//                Song(
-//                    mediaId = audioFileMeta.description.mediaId,
-//                    songUri = audioFileMeta.description.mediaUri,
-//                    title = audioFileMeta.description.title.toString(),
-//                    // TODO: Subtitle is probably not an artist!
-//                    artist = audioFileMeta.description.subtitle.toString(),
-//                    //artist = audioFileMeta.getString(MediaMetadataCompat.METADATA_KEY_ARTIST),
-//                    imageBitmap = audioFileMeta.getBitmap(MediaMetadataCompat.METADATA_KEY_ALBUM_ART)
-//                )
-//            )
-//        }
-//        Timber.d("getAudioFilesObjects returned $audioFilesObjects")
-//        return audioFilesObjects
-//    }
-
-
-
-    private const val AUTHORITY = "com.lacrima.android.audioplayer"
 }

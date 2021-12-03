@@ -27,7 +27,6 @@ const val NOW_PLAYING_NOTIFICATION_ID = 1
  * A wrapper class for ExoPlayer's PlayerNotificationManager. It sets up the notification shown to
  * the user during audio playback and provides track metadata, such as track title and icon image.
  */
-
 class MyNotificationManager(
     private val context: Context,
     sessionToken: MediaSessionCompat.Token,
@@ -39,14 +38,12 @@ class MyNotificationManager(
     val notificationBitmapWidth = 100.toPixels
     val notificationBitmapHeight = 100.toPixels
 
-    val systemNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val systemNotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE)
+            as NotificationManager
 
     init {
         //Allows an app to interact with an ongoing media session.
         val mediaController = MediaControllerCompat(context, sessionToken)
-
-
-
 
         createNotificationChannel()
 
@@ -104,10 +101,9 @@ class MyNotificationManager(
             player: Player,
             callback: PlayerNotificationManager.BitmapCallback
         ): Bitmap? {
-            Timber.d("getCurrentLargeIcon() with Glide is called")
-
             Glide.with(context).asBitmap()
-                .load(controller.metadata.description.iconBitmap ?: R.drawable.ic_music_note_notification)
+                .load(controller.metadata.description.iconBitmap ?:
+                R.drawable.ic_music_note_notification)
                 .centerCrop()
                 .override(notificationBitmapWidth, notificationBitmapHeight)
                 .into(object : CustomTarget<Bitmap>() {

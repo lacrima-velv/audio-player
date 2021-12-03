@@ -92,12 +92,12 @@ object AudioFilesSource {
         }
 
     fun whenReady(action: (Boolean) -> Unit): Boolean {
-        if(state == State.STATE_CREATED || state == State.STATE_INITIALIZING) {
+        return if (state == State.STATE_CREATED || state == State.STATE_INITIALIZING) {
             onReadyListeners += action
-            return false
+            false
         } else {
             action(state == State.STATE_INITIALIZED)
-            return true
+            true
         }
     }
 
@@ -111,7 +111,7 @@ object AudioFilesSource {
         val audioFiles = mutableListOf<MediaMetadataCompat>()
         for (uriForMetadata in getListOfFilesUrisForMetadataRetriever(context)) {
             val uriForPlayer =
-                getListOfFilesUrisForPlayer(context)[getListOfFilesUrisForMetadataRetriever(context)
+                getListOfFilesUrisForPlayer()[getListOfFilesUrisForMetadataRetriever(context)
                     .indexOf(uriForMetadata)]
             audioFiles.add(getAudioFile(context, uriForMetadata, uriForPlayer))
         }
@@ -147,10 +147,10 @@ object AudioFilesSource {
         return listOfFileUris
     }
 
-    private fun getListOfFilesUrisForPlayer(context: Context): List<Uri> {
+    private fun getListOfFilesUrisForPlayer(): List<Uri> {
         val listOfFileUris = mutableListOf<Uri>()
         for (res in listOfAudioFilesRes) {
-            listOfFileUris.add(getRawUri(context, res))
+            listOfFileUris.add(getRawUri(res))
         }
         return listOfFileUris
     }
