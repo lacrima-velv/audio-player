@@ -20,23 +20,25 @@ import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.lacrima.audioplayer.R
 import com.lacrima.audioplayer.data.AudioFilesSource.asMediaItems
 import com.lacrima.audioplayer.data.AudioFilesSource.asMediaSource
 import com.lacrima.audioplayer.data.AudioFilesSource.audioFilesMetadata
-import com.lacrima.audioplayer.data.AudioFilesSource.getAudioFilesMetadata
+import com.lacrima.audioplayer.data.AudioFilesSource.fetchMediaData
+import com.lacrima.audioplayer.data.AudioFilesSource.setFirestoreSettings
+import com.lacrima.audioplayer.data.AudioFilesSource.setListenerToFirebaseCollection
 import com.lacrima.audioplayer.data.AudioFilesSource.whenReady
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import timber.log.Timber
 
 const val MEDIA_ROOT_ID = "root_id"
 private const val SERVICE_TAG = "MusicService"
 
 class MusicService : MediaBrowserServiceCompat(), KoinComponent {
 
-    private val dataSourceFactory: DefaultDataSource.Factory by inject()
+    private val dataSourceFactory: CacheDataSourceFactory by inject()
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -71,8 +73,10 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
     override fun onCreate() {
         super.onCreate()
 
-         serviceScope.launch {
-          getAudioFilesMetadata(this@MusicService)
+        serviceScope.launch {
+            setFirestoreSettings()
+            setListenerToFirebaseCollection()
+            fetchMediaData()
         }
 
         val mutabilityFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -122,7 +126,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
         // ExoPlayer will manage the MediaSession for us.
         mediaSessionConnector = MediaSessionConnector(mediaSession)
         mediaSessionConnector.setPlaybackPreparer(MyPlaybackPreparer {
-        // This callback will be called every time the player plays a new song
+            // This callback will be called every time the player plays a new song
             currentlyPlayingSong = it
 
             preparePlayer(
@@ -201,8 +205,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
         }
 
         override fun onPrepareFromSearch(query: String, playWhenReady: Boolean, extras: Bundle?)
-        = Unit
-
+                = Unit
 
         override fun onPrepareFromUri(uri: Uri, playWhenReady: Boolean, extras: Bundle?) = Unit
 
@@ -248,7 +251,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
         }
 
         override fun onPlayerError(error: PlaybackException) {
-            val message = getString(R.string.unexpected_error)
+            val message = getString(R.string.unexpected_error_player)
             Toast.makeText(
                 this@MusicService,
                 message,
@@ -282,6 +285,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
                 val resultsSent = whenReady { isInitialized ->
                     if (isInitialized) {
                         result.sendResult(asMediaItems())
+                        Timber.d("onLoadChildren: result is sent")
                         if (!isPlayerInitialized && audioFilesMetadata.isNotEmpty()) {
                             preparePlayer(audioFilesMetadata, audioFilesMetadata[0], false)
                             isPlayerInitialized = true

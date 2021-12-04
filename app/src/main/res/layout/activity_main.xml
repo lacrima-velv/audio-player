@@ -189,5 +189,10 @@
         app:layout_constraintTop_toTopOf="@id/music_queue"
         android:importantForAccessibility="no" />
 
+    <include layout="@layout/progress"/>
+
+    <include layout="@layout/general_error_initial"/>
+
+    <include layout="@layout/no_wifi_initial"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

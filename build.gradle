@@ -15,6 +15,12 @@ buildscript {
         exoplayer_version = '2.16.1'
         koin_version = '3.1.3'
         glide_version = '4.12.0'
+        firebase_firestore = '24.0.0'
+        firebase_storage_ktx = '20.0.0'
+        coroutines_play_services = '1.1.1'
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.3'
     }
 }
 

@@ -15,4 +15,9 @@
         <!-- Customize your theme here. -->
         <item name="backgroundColor">@color/purple_grey_light</item>
     </style>
+
+    <style name="Theme.AudioPlayer.Splash" parent="Theme.AudioPlayer">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
 </resources>

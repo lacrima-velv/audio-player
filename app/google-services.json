@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "473855930052",
+    "project_id": "audio-player-8dd5e",
+    "storage_bucket": "audio-player-8dd5e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473855930052:android:2e4ebc2cb0030e5778a391",
+        "android_client_info": {
+          "package_name": "com.lacrima.audioplayer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473855930052-4jf98etdv8dqqob1nijfv90qraiqojeb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZwgIPQQSRpM5kMfFlF0v0bO64UWFlTJ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473855930052-4jf98etdv8dqqob1nijfv90qraiqojeb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

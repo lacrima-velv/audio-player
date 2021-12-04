@@ -5,7 +5,8 @@
     <string name="next_song">Next: %1$s - %2$s</string>
     <string name="unknown">Unknown</string>
     <string name="unknown_error">An unknown error occurred</string>
-    <string name="unexpected_error">The application has encountered an unexpected error</string>
+    <string name="unexpected_error_player">Couldn\'t play the song.
+        The application has encountered an unexpected error</string>
     <string name="playback_time">00:00</string>
     <string name="skip_to_the_next_song">Skip to the next song</string>
     <string name="play_or_pause_the_music">Play or pause the music</string>

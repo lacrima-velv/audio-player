@@ -4,6 +4,7 @@
     package="com.lacrima.audioplayer">
 
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:name=".MyApp"
@@ -14,6 +15,7 @@
         android:theme="@style/Theme.AudioPlayer">
         <activity
             android:name=".ui.MainActivity"
+            android:theme="@style/Theme.AudioPlayer.Splash"
             android:screenOrientation="portrait"
             android:exported="true"
             tools:ignore="LockedOrientationActivity">

@@ -7,7 +7,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import com.google.android.exoplayer2.ExoPlayer
 import com.lacrima.audioplayer.generalutils.Event
 import com.lacrima.audioplayer.generalutils.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -16,11 +15,15 @@ import timber.log.Timber
 
 class MusicServiceConnection(context: Context) {
 
-    private val _isConnected = MutableStateFlow<Event<Resource<Boolean>>>(Event(Resource.notStarted("The process has not started yet",null)))
+    private val _isConnected = MutableStateFlow<Event<Resource<Boolean>>>(
+        Event(Resource.notStarted("The process has not started yet",null))
+    )
     val isConnected: StateFlow<Event<Resource<Boolean>>>
         get() = _isConnected
 
-    private val _sessionError = MutableStateFlow<Event<Resource<Boolean>>>(Event(Resource.notStarted("Didn't get any error", null)))
+    private val _sessionError = MutableStateFlow<Event<Resource<Boolean>>>(
+        Event(Resource.notStarted("Didn't get any error", null))
+    )
     val sessionError: StateFlow<Event<Resource<Boolean>>>
         get() = _sessionError
 
@@ -52,7 +55,7 @@ class MusicServiceConnection(context: Context) {
         connect()
     }
 
-    // Used for controlling of playback: pause, play, rewind, etc.
+    // Used for controlling of the playback: pause, play, rewind, etc.
     lateinit var mediaController: MediaControllerCompat
 
     // We need to react, when the subscription to the specific media id is finished
@@ -65,7 +68,7 @@ class MusicServiceConnection(context: Context) {
     }
 
     private inner class MediaBrowserConnectionCallback(private val context: Context) :
-    MediaBrowserCompat.ConnectionCallback() {
+        MediaBrowserCompat.ConnectionCallback() {
 
         override fun onConnected() {
             Timber.d("MediaBrowserConnectionCallback: onConnected() is called")
