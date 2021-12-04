@@ -15,7 +15,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:visibility="visible" />
+        tools:visibility="visible"
+        android:importantForAccessibility="no"/>
 
     <TextView
         android:id="@+id/general_error_text"
@@ -23,7 +24,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
-        android:text="An unknown error has occurred"
+        android:text="@string/general_error"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/general_error_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -35,7 +36,7 @@
         android:id="@+id/general_error_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Retry"
+        android:text="@string/retry"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

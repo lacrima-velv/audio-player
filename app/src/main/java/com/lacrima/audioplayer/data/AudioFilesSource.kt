@@ -11,8 +11,6 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DataSource
 import com.lacrima.audioplayer.remote.MusicDatabase
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -59,33 +57,6 @@ object AudioFilesSource : KoinComponent {
 
     // Used in MusicServer to get the metadata
     var audioFilesMetadata = emptyList<MediaMetadataCompat>()
-
-    private val _fetchingFirebaseDocumentState =
-        MutableStateFlow<FetchingFirebaseDocumentState>(FetchingFirebaseDocumentState.NotStarted)
-    val fetchingFirebaseDocumentState: StateFlow<FetchingFirebaseDocumentState>
-        get() = _fetchingFirebaseDocumentState
-
-    fun setListenerToFirebaseCollection() {
-        musicDatabase.songCollection.document().get()
-            .addOnFailureListener { exception ->
-                Timber.d("Firebase get collection exception: ${exception.message} " +
-                        "State is $fetchingMetadataState")
-                _fetchingFirebaseDocumentState.value = FetchingFirebaseDocumentState.Error
-            }
-            .addOnSuccessListener { document ->
-                if (document != null) {
-                    Timber.d("DocumentSnapshot data: ${document.data}")
-                    _fetchingFirebaseDocumentState.value = FetchingFirebaseDocumentState.Success
-                } else {
-                    Timber.d("No such document")
-                    _fetchingFirebaseDocumentState.value = FetchingFirebaseDocumentState.Error
-                }
-            }
-    }
-
-    fun setFirestoreSettings() {
-        musicDatabase.setFirestoreSettings()
-    }
 
     suspend fun fetchMediaData() = withContext(Dispatchers.Main) {
         fetchingMetadataState = FetchingMetadataState.STATE_INITIALIZING
@@ -151,10 +122,4 @@ enum class FetchingMetadataState {
     STATE_INITIALIZING,
     STATE_INITIALIZED,
     STATE_ERROR
-}
-
-sealed class FetchingFirebaseDocumentState {
-    object NotStarted: FetchingFirebaseDocumentState()
-    object Success: FetchingFirebaseDocumentState()
-    object Error: FetchingFirebaseDocumentState()
 }

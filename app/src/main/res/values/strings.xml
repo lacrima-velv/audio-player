@@ -11,4 +11,7 @@
     <string name="skip_to_the_next_song">Skip to the next song</string>
     <string name="play_or_pause_the_music">Play or pause the music</string>
     <string name="skip_to_the_previous_song">Skip to the previous song</string>
+    <string name="general_error">An unknown error has occurred</string>
+    <string name="retry">Retry</string>
+    <string name="no_wi_fi_error">No Wi-Fi connection</string>
 </resources>

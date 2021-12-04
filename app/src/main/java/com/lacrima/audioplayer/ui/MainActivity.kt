@@ -19,7 +19,6 @@ import com.lacrima.audioplayer.generalutils.Util.setUiWindowInsetsTop
 import com.lacrima.audioplayer.generalutils.Util.toPixels
 import com.lacrima.audioplayer.data.AudioFilesSource.fetchMediaData
 import com.lacrima.audioplayer.data.AudioFilesSource.toSong
-import com.lacrima.audioplayer.data.FetchingFirebaseDocumentState
 import com.lacrima.audioplayer.data.Song
 import com.lacrima.audioplayer.databinding.*
 import com.lacrima.audioplayer.exoplayer.currentPlaybackPosition
@@ -27,6 +26,7 @@ import com.lacrima.audioplayer.exoplayer.isPlaying
 import com.lacrima.audioplayer.generalutils.Status
 import com.lacrima.audioplayer.generalutils.Status.ERROR
 import com.lacrima.audioplayer.generalutils.Status.SUCCESS
+import com.lacrima.audioplayer.remote.FetchingFirebaseDocumentState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         setTheme(R.style.Theme_AudioPlayer)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
+        // Bind outer views
         errorNoWifiBindingInitial = NoWifiInitialBinding.bind(binding.root)
         generalErrorBindingInitial = GeneralErrorInitialBinding.bind(binding.root)
         progressBinding = ProgressBinding.bind(binding.root)
@@ -288,7 +289,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         }
     }
 
-    fun showProgress() {
+    private fun showProgress() {
         progressBinding.progressBar.isVisible = true
 
         for (view in defaultViews) {
@@ -302,7 +303,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         }
     }
 
-    fun showNoWifiError() {
+    private fun showNoWifiError() {
         progressBinding.progressBar.isVisible = false
 
         for (view in defaultViews) {
@@ -316,7 +317,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         }
     }
 
-    fun showGeneralError() {
+    private fun showGeneralError() {
         progressBinding.progressBar.isVisible = false
 
         for (view in defaultViews) {
@@ -328,15 +329,6 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         for (view in generalErrorViews) {
             view.isVisible = true
         }
-    }
-
-    private fun showOfflinePlaceholder() {
-       if (!checkIsConnectedToWiFi()) {
-           binding.seekBar.isVisible = false
-           binding.nextSong.isVisible = false
-           binding.positionTime.isVisible = false
-
-       }
     }
 
     private fun setTimeToTextView(view: TextView, ms: Long) {

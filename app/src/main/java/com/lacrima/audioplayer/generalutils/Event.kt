@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package com.lacrima.audioplayer.generalutils
 
 open class Event<out T>(private val data: T) {

@@ -9,11 +9,16 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.lacrima.audioplayer.generalutils.Event
 import com.lacrima.audioplayer.generalutils.Resource
+import com.lacrima.audioplayer.remote.MusicDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
-class MusicServiceConnection(context: Context) {
+class MusicServiceConnection(context: Context): KoinComponent {
+
+    private val musicDatabase: MusicDatabase by inject()
 
     private val _isConnected = MutableStateFlow<Event<Resource<Boolean>>>(
         Event(Resource.notStarted("The process has not started yet",null))
@@ -38,6 +43,8 @@ class MusicServiceConnection(context: Context) {
     private val _currentlyPlayingSongDuration = MutableStateFlow(0L)
     val currentlyPlayingSongDuration: StateFlow<Long>
         get() = _currentlyPlayingSongDuration
+
+    val fetchingFirebaseDocumentState = musicDatabase.fetchingFirebaseDocumentState
 
 
     private val mediaBrowserConnectionCallback = MediaBrowserConnectionCallback(context)

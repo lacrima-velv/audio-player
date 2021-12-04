@@ -1,34 +1,19 @@
 package com.lacrima.audioplayer.generalutils
 
 import android.app.Activity
-import android.content.ContentResolver
 import android.content.Context
 import android.content.res.Resources
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
-import android.net.Uri
 import android.os.Build
 import android.util.TypedValue
 import android.view.View
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.google.android.exoplayer2.upstream.RawResourceDataSource
 import timber.log.Timber
-import java.io.File
 
 object Util {
-    fun getRawUriForMetadataRetriever(context: Context, fileResource: Int): Uri {
-        Timber.d("getRawUri returned ${Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + File.pathSeparator +
-                "//" + context.packageName + "/raw/" + fileResource)}")
-        return Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + File.pathSeparator +
-                "//" + context.packageName + "/raw/" + fileResource)
-    }
-
-    fun getRawUri(fileResource: Int): Uri {
-        return RawResourceDataSource.buildRawResourceUri(fileResource)
-    }
-
     /**
      * Convert dp to pixels
      */

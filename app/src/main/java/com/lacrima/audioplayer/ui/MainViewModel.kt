@@ -4,20 +4,16 @@ import android.app.Application
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat.METADATA_KEY_MEDIA_ID
 import androidx.lifecycle.AndroidViewModel
-import com.lacrima.audioplayer.data.AudioFilesSource
 import com.lacrima.audioplayer.data.Song
 import com.lacrima.audioplayer.exoplayer.*
 import com.lacrima.audioplayer.generalutils.Resource
-import com.lacrima.audioplayer.remote.MusicDatabase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import timber.log.Timber
 
 class MainViewModel(application: Application): AndroidViewModel(application), KoinComponent {
     private val musicServiceConnection: MusicServiceConnection by inject()
-    private val musicDatabase: MusicDatabase by inject()
     private val _mediaItems = MutableStateFlow<Resource<List<Song>>>(
         Resource.notStarted("Still haven't got any media items", null)
     )
@@ -29,8 +25,7 @@ class MainViewModel(application: Application): AndroidViewModel(application), Ko
     val playbackState = musicServiceConnection.playbackState
     val currentlyPlayingSong = musicServiceConnection.currentlyPlayingSong
     val currentlyPlayingSongDuration = musicServiceConnection.currentlyPlayingSongDuration
-    val fetchingFirebaseDocumentState = AudioFilesSource.fetchingFirebaseDocumentState
-
+    val fetchingFirebaseDocumentState = musicServiceConnection.fetchingFirebaseDocumentState
 
     init {
         _mediaItems.value = Resource.loading(null)
@@ -53,7 +48,8 @@ class MainViewModel(application: Application): AndroidViewModel(application), Ko
                     )
                 }
                 if (items.isNotEmpty()) {_mediaItems.value = Resource.success(items)} else {
-                    _mediaItems.value = Resource.error("Couldn't get any items due to error", items)
+                    _mediaItems.value = Resource.
+                    error("Couldn't get any items due to error", items)
                 }
 
             }

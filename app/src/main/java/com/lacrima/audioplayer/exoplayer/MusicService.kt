@@ -25,9 +25,8 @@ import com.lacrima.audioplayer.data.AudioFilesSource.asMediaItems
 import com.lacrima.audioplayer.data.AudioFilesSource.asMediaSource
 import com.lacrima.audioplayer.data.AudioFilesSource.audioFilesMetadata
 import com.lacrima.audioplayer.data.AudioFilesSource.fetchMediaData
-import com.lacrima.audioplayer.data.AudioFilesSource.setFirestoreSettings
-import com.lacrima.audioplayer.data.AudioFilesSource.setListenerToFirebaseCollection
 import com.lacrima.audioplayer.data.AudioFilesSource.whenReady
+import com.lacrima.audioplayer.remote.MusicDatabase
 import kotlinx.coroutines.*
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -39,6 +38,7 @@ private const val SERVICE_TAG = "MusicService"
 class MusicService : MediaBrowserServiceCompat(), KoinComponent {
 
     private val dataSourceFactory: CacheDataSourceFactory by inject()
+    private val musicDatabase: MusicDatabase by inject()
 
     private val serviceJob = SupervisorJob()
     private val serviceScope = CoroutineScope(Dispatchers.Main + serviceJob)
@@ -74,8 +74,8 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
         super.onCreate()
 
         serviceScope.launch {
-            setFirestoreSettings()
-            setListenerToFirebaseCollection()
+            musicDatabase.setFirestoreSettings()
+            musicDatabase.setListenerToFirebaseCollection()
             fetchMediaData()
         }
 
