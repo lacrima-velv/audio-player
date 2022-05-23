@@ -244,6 +244,7 @@ class MusicService : MediaBrowserServiceCompat(), KoinComponent {
      */
     private inner class PlayerEventListener : Player.Listener {
 
+        @Deprecated("Deprecated in Java")
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             if(playbackState == Player.STATE_READY && !playWhenReady) {
                 stopForeground(false)
