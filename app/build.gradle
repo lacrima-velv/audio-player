@@ -42,6 +42,7 @@ dependencies {
     implementation "androidx.appcompat:appcompat:$androidx_app_compat_version"
     implementation "com.google.android.material:material:$android_material_version"
     implementation "androidx.constraintlayout:constraintlayout:$constraint_layout_version"
+
     testImplementation "junit:junit:$junit_version"
     androidTestImplementation "androidx.test.ext:junit:$test_ext_junit_version"
     androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_version"
@@ -64,7 +65,7 @@ dependencies {
     annotationProcessor "com.github.bumptech.glide:compiler:$glide_version"
 
     // Firebase
+    implementation "com.google.firebase:firebase-firestore-ktx:$firebase_firestore"
     implementation "com.google.firebase:firebase-firestore:$firebase_firestore"
-    implementation "com.google.firebase:firebase-storage-ktx:$firebase_storage_ktx"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:$coroutines_play_services"
 }
