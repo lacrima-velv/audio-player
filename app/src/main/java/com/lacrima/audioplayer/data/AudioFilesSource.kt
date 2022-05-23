@@ -1,102 +1,56 @@
 package com.lacrima.audioplayer.data
 
-import android.content.Context
-import android.graphics.BitmapFactory
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.MediaMetadataCompat.*
 import com.google.android.exoplayer2.MediaItem
-import com.google.android.exoplayer2.MetadataRetriever
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.upstream.DefaultDataSource
-import com.lacrima.audioplayer.R
-import com.lacrima.audioplayer.Util.getRawUri
-import com.lacrima.audioplayer.Util.getRawUriForMetadataRetriever
+import com.google.android.exoplayer2.upstream.DataSource
+import com.lacrima.audioplayer.remote.MusicDatabase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 import timber.log.Timber
 
-object AudioFilesSource {
 
-    // This list must be updated, if a new row resource is added or removed
-    private val listOfAudioFilesRes = listOf(
-        R.raw.lana_del_rey_florida_kilos,
-        R.raw.kent_columbus,
-        R.raw.lana_del_rey_gods_and_monsters,
-        R.raw.lana_del_rey_salvatore,
-        R.raw.radiohead_i_will,
-        R.raw.lana_del_rey_cherry,
-        R.raw.travis_idlewild
-    )
+object AudioFilesSource : KoinComponent {
 
-    private val metadataRetriever = MediaMetadataRetriever()
+    private val musicDatabase: MusicDatabase by inject()
 
-    // Will be used inside a suspend function to retrieve all the metadata
-    private fun getAudioFile(context: Context, uriForMetadata: Uri, uriForPlayer: Uri):
-            MediaMetadataCompat {
-            metadataRetriever.setDataSource(context, uriForMetadata)
-        val metadata: MediaMetadataCompat
-
-        val artworkRaw = metadataRetriever.embeddedPicture
-        val title = metadataRetriever
-            .extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-        val artist = metadataRetriever
-            .extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-        val duration = metadataRetriever
-            .extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)?.toLong() ?: 0
-
-        val metadataBuilder = Builder()
-            .putString(METADATA_KEY_TITLE, title)
-            .putString(METADATA_KEY_DISPLAY_TITLE, title)
-            .putString(METADATA_KEY_ARTIST, artist)
-            .putString(METADATA_KEY_DISPLAY_DESCRIPTION, artist)
-            .putString(METADATA_KEY_DISPLAY_SUBTITLE, artist)
-            .putString(METADATA_KEY_MEDIA_URI, uriForPlayer.toString())
-            .putString(METADATA_KEY_MEDIA_ID, uriForPlayer.toString())
-            .putLong(METADATA_KEY_DURATION, duration)
-            .putString(METADATA_KEY_ALBUM_ARTIST, artist)
-
-        metadata = if (artworkRaw != null) {
-            // Convert the byte array to a bitmap
-            val bitmap = BitmapFactory.decodeByteArray(artworkRaw, 0, artworkRaw.size)
-            metadataBuilder
-                .putBitmap(METADATA_KEY_ALBUM_ART, bitmap)
-                .build()
-        } else {
-            metadataBuilder.build()
-        }
-
-        return metadata
-    }
-
-    // Used to check if file's metadata is initialized, and to queue any callbacks if it's not
+    // Used to check if files are downloaded and file's metadata is initialized.
+    // It queues any callbacks if our files are not ready.
     private val onReadyListeners = mutableListOf<(Boolean) -> Unit>()
 
-    private var state: State = State.STATE_CREATED
+    var fetchingMetadataState: FetchingMetadataState = FetchingMetadataState.STATE_CREATED
         set(value) {
-            if(value == State.STATE_INITIALIZED || value == State.STATE_ERROR) {
+            if(value == FetchingMetadataState.STATE_INITIALIZED || value ==
+                FetchingMetadataState.STATE_ERROR) {
+                // Everything inside this block will only be accessed from the same thread
                 synchronized(onReadyListeners) {
                     field = value
+                    // Call lambdas inside onReadyListeners if state is initialized
                     onReadyListeners.forEach { listener ->
-                        listener(state == State.STATE_INITIALIZED)
+                        listener(fetchingMetadataState == FetchingMetadataState.STATE_INITIALIZED)
                     }
                 }
             } else {
                 field = value
             }
         }
-
+    // When the music source is ready, we call this action
     fun whenReady(action: (Boolean) -> Unit): Boolean {
-        return if (state == State.STATE_CREATED || state == State.STATE_INITIALIZING) {
+        return if (fetchingMetadataState == FetchingMetadataState.STATE_CREATED ||
+            fetchingMetadataState == FetchingMetadataState.STATE_INITIALIZING) {
+            // Schedule this action
             onReadyListeners += action
             false
         } else {
-            action(state == State.STATE_INITIALIZED)
+            // Call this action, if the music source is initialized
+            action(fetchingMetadataState == FetchingMetadataState.STATE_INITIALIZED)
             true
         }
     }
@@ -104,70 +58,66 @@ object AudioFilesSource {
     // Used in MusicServer to get the metadata
     var audioFilesMetadata = emptyList<MediaMetadataCompat>()
 
-    suspend fun getAudioFilesMetadata(context: Context) = withContext(
-        Dispatchers.Main){
-        Timber.d("getAudioFilesMetadata() is called")
-        state = State.STATE_INITIALIZING
-        val audioFiles = mutableListOf<MediaMetadataCompat>()
-        for (uriForMetadata in getListOfFilesUrisForMetadataRetriever(context)) {
-            val uriForPlayer =
-                getListOfFilesUrisForPlayer()[getListOfFilesUrisForMetadataRetriever(context)
-                    .indexOf(uriForMetadata)]
-            audioFiles.add(getAudioFile(context, uriForMetadata, uriForPlayer))
+    suspend fun fetchMediaData() = withContext(Dispatchers.Main) {
+        fetchingMetadataState = FetchingMetadataState.STATE_INITIALIZING
+        val allSongs = musicDatabase.getAllSongs()
+        if (allSongs.isEmpty()) {
+            Timber.d("Couldn't get any songs from Firebase. " +
+                    "State is $fetchingMetadataState")
+        } else {
+            audioFilesMetadata = allSongs.map { song ->
+                Builder()
+                    .putString(METADATA_KEY_TITLE, song.title)
+                    .putString(METADATA_KEY_DISPLAY_TITLE, song.title)
+                    .putString(METADATA_KEY_ARTIST, song.artist)
+                    .putString(METADATA_KEY_DISPLAY_DESCRIPTION, song.artist)
+                    .putString(METADATA_KEY_DISPLAY_SUBTITLE, song.artist)
+                    .putString(METADATA_KEY_MEDIA_URI, song.songUrl)
+                    .putString(METADATA_KEY_MEDIA_ID, song.mediaId)
+                    .putLong(METADATA_KEY_DURATION, song.duration)
+                    .putString(METADATA_KEY_ALBUM_ARTIST, song.artist)
+                    .putString(METADATA_KEY_ALBUM_ART_URI, song.imageUrl)
+                    .putString(METADATA_KEY_DISPLAY_ICON_URI, song.imageUrl)
+                    .build()
+            }
+            fetchingMetadataState = FetchingMetadataState.STATE_INITIALIZED
         }
-        audioFilesMetadata =  audioFiles.toList()
-        state = State.STATE_INITIALIZED
     }
 
-    fun asMediaSource(dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource {
+    fun asMediaSource(dataSourceFactory: DataSource.Factory): ConcatenatingMediaSource {
         val concatenatingMediaSource = ConcatenatingMediaSource()
-        audioFilesMetadata.forEach { audioFile ->
+        audioFilesMetadata.forEach { song ->
             val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(MediaItem.fromUri(audioFile.getString(METADATA_KEY_MEDIA_URI)))
+                .createMediaSource(MediaItem.fromUri(song.getString(METADATA_KEY_MEDIA_URI)))
             concatenatingMediaSource.addMediaSource(mediaSource)
         }
         return concatenatingMediaSource
     }
 
-    fun asMediaItems() = audioFilesMetadata.map { audioFile ->
+    fun asMediaItems() = audioFilesMetadata.map { song ->
         val description = MediaDescriptionCompat.Builder()
-            .setMediaUri(audioFile.description.mediaUri)
-            .setTitle(audioFile.description.title)
-            .setSubtitle(audioFile.description.subtitle)
-            .setMediaId(audioFile.description.mediaId)
+            .setMediaUri(song.description.mediaUri)
+            .setTitle(song.description.title)
+            .setSubtitle(song.description.subtitle)
+            .setMediaId(song.description.mediaId)
+            .setIconUri(song.description.iconUri)
             .build()
         MediaBrowserCompat.MediaItem(description, FLAG_PLAYABLE)
     }.toMutableList()
 
-    private fun getListOfFilesUrisForMetadataRetriever(context: Context): List<Uri> {
-        val listOfFileUris = mutableListOf<Uri>()
-        for (res in listOfAudioFilesRes) {
-            listOfFileUris.add(getRawUriForMetadataRetriever(context, res))
-        }
-        return listOfFileUris
-    }
-
-    private fun getListOfFilesUrisForPlayer(): List<Uri> {
-        val listOfFileUris = mutableListOf<Uri>()
-        for (res in listOfAudioFilesRes) {
-            listOfFileUris.add(getRawUri(res))
-        }
-        return listOfFileUris
-    }
-
     fun MediaMetadataCompat.toSong(): Song {
         return Song(
-            mediaId = this.description.mediaId,
-            songUri = this.description.mediaUri,
+            mediaId = this.description.mediaId ?: "unknown",
+            songUrl = this.description.mediaUri.toString(),
             title = this.description.title.toString(),
             artist = this.description.subtitle.toString(),
-            imageBitmap = this.getBitmap(METADATA_KEY_ALBUM_ART),
+            imageUrl = this.description.iconUri.toString(),
             duration = this.getLong(METADATA_KEY_DURATION)
         )
     }
 }
 
-enum class State {
+enum class FetchingMetadataState {
     STATE_CREATED,
     STATE_INITIALIZING,
     STATE_INITIALIZED,

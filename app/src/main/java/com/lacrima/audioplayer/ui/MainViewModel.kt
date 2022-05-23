@@ -14,7 +14,6 @@ import org.koin.core.component.inject
 
 class MainViewModel(application: Application): AndroidViewModel(application), KoinComponent {
     private val musicServiceConnection: MusicServiceConnection by inject()
-
     private val _mediaItems = MutableStateFlow<Resource<List<Song>>>(
         Resource.notStarted("Still haven't got any media items", null)
     )
@@ -26,7 +25,7 @@ class MainViewModel(application: Application): AndroidViewModel(application), Ko
     val playbackState = musicServiceConnection.playbackState
     val currentlyPlayingSong = musicServiceConnection.currentlyPlayingSong
     val currentlyPlayingSongDuration = musicServiceConnection.currentlyPlayingSongDuration
-
+    val fetchingFirebaseDocumentState = musicServiceConnection.fetchingFirebaseDocumentState
 
     init {
         _mediaItems.value = Resource.loading(null)
@@ -40,14 +39,19 @@ class MainViewModel(application: Application): AndroidViewModel(application), Ko
                 super.onChildrenLoaded(parentId, children)
                 val items = children.map {
                     Song(
-                        it.mediaId,
-                        it.description.mediaUri,
+                        it.mediaId ?: "",
+                        it.description.mediaUri.toString(),
                         it.description.title.toString(),
                         it.description.subtitle.toString(),
-                        it.description.iconBitmap
+                        it.description.iconUri.toString(),
+                        0L
                     )
                 }
-                _mediaItems.value = Resource.success(items)
+                if (items.isNotEmpty()) {_mediaItems.value = Resource.success(items)} else {
+                    _mediaItems.value = Resource.
+                    error("Couldn't get any items due to error", items)
+                }
+
             }
         })
 

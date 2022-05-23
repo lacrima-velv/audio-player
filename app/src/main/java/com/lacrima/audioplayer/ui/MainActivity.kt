@@ -2,8 +2,10 @@ package com.lacrima.audioplayer.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.bumptech.glide.Glide
@@ -11,15 +13,20 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.snackbar.Snackbar
 import com.lacrima.audioplayer.BuildConfig
 import com.lacrima.audioplayer.R
-import com.lacrima.audioplayer.Util.setUiWindowInsetsBottom
-import com.lacrima.audioplayer.Util.setUiWindowInsetsTop
+import com.lacrima.audioplayer.generalutils.Util.checkIsConnectedToWiFi
+import com.lacrima.audioplayer.generalutils.Util.setUiWindowInsetsBottom
+import com.lacrima.audioplayer.generalutils.Util.setUiWindowInsetsTop
+import com.lacrima.audioplayer.generalutils.Util.toPixels
+import com.lacrima.audioplayer.data.AudioFilesSource.fetchMediaData
 import com.lacrima.audioplayer.data.AudioFilesSource.toSong
 import com.lacrima.audioplayer.data.Song
-import com.lacrima.audioplayer.databinding.ActivityMainBinding
+import com.lacrima.audioplayer.databinding.*
 import com.lacrima.audioplayer.exoplayer.currentPlaybackPosition
 import com.lacrima.audioplayer.exoplayer.isPlaying
+import com.lacrima.audioplayer.generalutils.Status
 import com.lacrima.audioplayer.generalutils.Status.ERROR
 import com.lacrima.audioplayer.generalutils.Status.SUCCESS
+import com.lacrima.audioplayer.remote.FetchingFirebaseDocumentState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
@@ -33,12 +40,20 @@ const val UPDATE_PLAYER_POSITION_INTERVAL = 100L
 
 class MainActivity : AppCompatActivity(), KoinComponent {
 
+    private val albumArtWidth = 200.toPixels
+    private val albumArtHeight = 200.toPixels
     private lateinit var mainViewModel: MainViewModel
     private lateinit var binding: ActivityMainBinding
+    private lateinit var errorNoWifiBindingInitial: NoWifiInitialBinding
+    private lateinit var generalErrorBindingInitial: GeneralErrorInitialBinding
+    private lateinit var progressBinding: ProgressBinding
     private var shouldUpdateSeekbar = true
     private var listOfSongs: List<Song>? = null
     private var nextSongTitle = ""
     private var nextSongArtist = ""
+    private lateinit var defaultViews: List<View>
+    private lateinit var generalErrorViews: List<View>
+    private lateinit var noWiFiErrorViews: List<View>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,14 +63,70 @@ class MainActivity : AppCompatActivity(), KoinComponent {
             Timber.plant(Timber.DebugTree())
         }
 
+        // Change from Splash screen theme to the default one
+        setTheme(R.style.Theme_AudioPlayer)
+
         binding = ActivityMainBinding.inflate(layoutInflater)
+        // Bind outer views
+        errorNoWifiBindingInitial = NoWifiInitialBinding.bind(binding.root)
+        generalErrorBindingInitial = GeneralErrorInitialBinding.bind(binding.root)
+        progressBinding = ProgressBinding.bind(binding.root)
+
         mainViewModel = ViewModelProvider(this)[MainViewModel::class.java]
 
         setUiWindowInsetsBottom(binding.musicQueue)
         setUiWindowInsetsBottom(binding.nextSong)
         setUiWindowInsetsTop(binding.appbar)
 
+        defaultViews = listOf(
+            binding.albumArt,
+            binding.seekBar,
+            binding.positionTime,
+            binding.durationTime,
+            binding.skipToPrevious,
+            binding.skipToNext,
+            binding.playPause,
+            binding.nextSong,
+            binding.rectangle,
+            binding.musicQueue
+        )
+
+        noWiFiErrorViews = listOf(
+            errorNoWifiBindingInitial.wifiErrorButton,
+            errorNoWifiBindingInitial.wifiErrorImage,
+            errorNoWifiBindingInitial.wifiErrorText
+        )
+
+        generalErrorViews = listOf(
+            generalErrorBindingInitial.generalErrorButton,
+            generalErrorBindingInitial.generalErrorImage,
+            generalErrorBindingInitial.generalErrorText
+        )
+
+        errorNoWifiBindingInitial.wifiErrorButton.setOnClickListener {
+            lifecycleScope.launch {
+                fetchMediaData()
+            }
+        }
+
+        generalErrorBindingInitial.generalErrorButton.setOnClickListener {
+            lifecycleScope.launch {
+                fetchMediaData()
+            }
+        }
+
         lifecycleScope.launchWhenStarted {
+            launch {
+                mainViewModel.fetchingFirebaseDocumentState.collectLatest {
+                    if (it == FetchingFirebaseDocumentState.Error) {
+                        if (!checkIsConnectedToWiFi()) {
+                            showNoWifiError()
+                        } else {
+                            showGeneralError()
+                        }
+                    }
+                }
+            }
             launch(Dispatchers.IO) {
                 updateCurrentPlayerPosition()
             }
@@ -101,7 +172,24 @@ class MainActivity : AppCompatActivity(), KoinComponent {
                     when (result.status) {
                         SUCCESS -> {
                             listOfSongs = result.data
+
+                            showDefaultViews()
+                            Timber.d("Items are $listOfSongs")
                             updateNextSongTitleArtist()
+                        }
+                        Status.LOADING -> {
+                            Timber.d("Items are loading")
+                            showProgress()
+
+                        }
+                        ERROR -> {
+                            Timber.d("An error has occurred. Couldn't get any items.")
+
+                            if (!checkIsConnectedToWiFi()) {
+                                showNoWifiError()
+                            } else {
+                                showGeneralError()
+                            }
                         }
                         else -> Unit
                     }
@@ -122,8 +210,9 @@ class MainActivity : AppCompatActivity(), KoinComponent {
 
                     Glide.with(this@MainActivity).asBitmap()
                         .load(
-                            (songMetadata?.description?.iconBitmap)
+                            (songMetadata?.description?.iconUri)
                         )
+                        .override(albumArtWidth, albumArtHeight)
                         .placeholder(R.drawable.ic_music_note_album_art)
                         .transform(RoundedCorners(30))
                         .into(binding.albumArt)
@@ -184,6 +273,62 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         })
 
         setContentView(binding.root)
+    }
+
+    private fun showDefaultViews() {
+        progressBinding.progressBar.isVisible = false
+
+        for (view in defaultViews) {
+            view.isVisible = true
+        }
+        for (view in noWiFiErrorViews) {
+            view.isVisible = false
+        }
+        for (view in generalErrorViews) {
+            view.isVisible = false
+        }
+    }
+
+    private fun showProgress() {
+        progressBinding.progressBar.isVisible = true
+
+        for (view in defaultViews) {
+            view.isVisible = false
+        }
+        for (view in noWiFiErrorViews) {
+            view.isVisible = false
+        }
+        for (view in generalErrorViews) {
+            view.isVisible = false
+        }
+    }
+
+    private fun showNoWifiError() {
+        progressBinding.progressBar.isVisible = false
+
+        for (view in defaultViews) {
+            view.isVisible = false
+        }
+        for (view in noWiFiErrorViews) {
+            view.isVisible = true
+        }
+        for (view in generalErrorViews) {
+            view.isVisible = false
+        }
+    }
+
+    private fun showGeneralError() {
+        progressBinding.progressBar.isVisible = false
+
+        for (view in defaultViews) {
+            view.isVisible = false
+        }
+        for (view in noWiFiErrorViews) {
+            view.isVisible = false
+        }
+        for (view in generalErrorViews) {
+            view.isVisible = true
+        }
     }
 
     private fun setTimeToTextView(view: TextView, ms: Long) {

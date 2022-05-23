@@ -11,14 +11,21 @@
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_music_note_48.xml" value="0.189" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_music_note_96.xml" value="0.2385" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_queue_music_48.xml" value="0.2025" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_queue_music_48_colored.xml" value="0.1645" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_queue_music_dark_48.xml" value="0.2025" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_baseline_wifi_off_48.xml" value="0.15" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_outline_music_note_24.xml" value="0.2025" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_outline_music_note_48.xml" value="0.2385" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/ic_round_pause_circle_outline_48.xml" value="0.1675" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/drawable/progress_indicator.xml" value="0.189" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout-night/activity_main.xml" value="0.19479166666666667" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/activity_indicator.xml" value="0.18072916666666666" />
-        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/activity_main.xml" value="0.2" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/activity_main.xml" value="0.25" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/general_error.xml" value="0.34739583333333335" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/general_error_later.xml" value="0.2234375" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/no_wifi.xml" value="0.29259259259259257" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/no_wifi_later.xml" value="0.2234375" />
+        <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/layout/progress.xml" value="0.34739583333333335" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.2385" />
         <entry key="..\:/Users/lacri/AndroidStudioProjects/AudioPlayer/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml" value="0.2385" />
       </map>
