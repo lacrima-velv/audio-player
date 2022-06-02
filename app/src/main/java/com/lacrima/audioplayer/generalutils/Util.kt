@@ -25,6 +25,12 @@ object Util {
         ).toInt()
 
     /**
+     * Convert pixels to dp
+     */
+    val Int.toDp
+        get() = (this / Resources.getSystem().displayMetrics.density).toInt()
+
+    /**
      * Apply window insets to the bottom of the view
      */
     fun setUiWindowInsetsBottom(view: View, bottomPadding: Int = 0) {

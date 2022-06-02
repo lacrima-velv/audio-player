@@ -126,20 +126,13 @@
         app:layout_constraintStart_toStartOf="parent"
         android:importantForAccessibility="no" />
 
-    <TextView
+    <androidx.compose.ui.platform.ComposeView
         android:id="@+id/next_song"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="8dp"
-        android:ellipsize="end"
-        android:maxLines="1"
-        android:textSize="8pt"
         app:layout_constraintBottom_toBottomOf="@id/rectangle"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/music_queue"
-        app:layout_constraintTop_toTopOf="@id/rectangle"
-        tools:text="Next: Kent - Columbus  some long long long name" />
+        app:layout_constraintTop_toTopOf="@id/rectangle" />
 
     <TextView
         android:id="@+id/position_time"

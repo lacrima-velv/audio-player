@@ -5,6 +5,18 @@ import android.os.Bundle
 import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -26,6 +38,7 @@ import com.lacrima.audioplayer.exoplayer.isPlaying
 import com.lacrima.audioplayer.generalutils.Status
 import com.lacrima.audioplayer.generalutils.Status.ERROR
 import com.lacrima.audioplayer.generalutils.Status.SUCCESS
+import com.lacrima.audioplayer.generalutils.Util.toDp
 import com.lacrima.audioplayer.remote.FetchingFirebaseDocumentState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -275,6 +288,48 @@ class MainActivity : AppCompatActivity(), KoinComponent {
         setContentView(binding.root)
     }
 
+    @Composable
+    private fun ShowNextSong(nextSongArtist: String, nextSongTitle: String) {
+
+        val infiniteTransition = rememberInfiniteTransition()
+
+        val negativeLineWidth = -(binding.nextSong.width.toDp)
+
+        val position by infiniteTransition.animateValue(
+            initialValue = negativeLineWidth.dp,
+            targetValue = 0.dp,
+            typeConverter = Dp.VectorConverter,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 6000
+                    0.dp at 3000 with FastOutSlowInEasing
+                },
+                repeatMode = RepeatMode.Reverse
+            )
+        )
+
+        MaterialTheme {
+            Text(
+                text = getString(R.string.next_song, nextSongArtist, nextSongTitle),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 4.dp)
+                    .offset(x = position)
+                    .clickable { mainViewModel.skipToNextSong() }
+            )
+        }
+
+    }
+
+    @Preview
+    @Composable
+    fun NextSongPreview() {
+        ShowNextSong("Song Artist", "Song Title Very Long Title " +
+                "Very Long Title So Long So Long Very Long Title So Long")
+    }
+
     private fun showDefaultViews() {
         progressBinding.progressBar.isVisible = false
 
@@ -337,6 +392,7 @@ class MainActivity : AppCompatActivity(), KoinComponent {
     }
 
     private fun updateNextSongTitleArtist() {
+
         // Find the position of currently playing song in a list of songs
         val currentlyPlayingSongPosition = listOfSongs?.indexOf(listOfSongs?.find {
             it.mediaId == mainViewModel.currentlyPlayingSong.value?.description?.mediaId })
@@ -351,7 +407,10 @@ class MainActivity : AppCompatActivity(), KoinComponent {
             nextSongArtist = listOfSongs?.get(0)?.artist ?: getString(R.string.unknown)
         }
 
-        binding.nextSong.text = getString(R.string.next_song, nextSongArtist, nextSongTitle)
+        findViewById<ComposeView>(R.id.next_song).setContent {
+            ShowNextSong(nextSongArtist, nextSongTitle)
+        }
+
     }
 
     private suspend fun updateCurrentPlayerPosition() {
